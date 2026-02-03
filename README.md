@@ -1,73 +1,94 @@
-# React + TypeScript + Vite
+# Interview Problem (Frontend): Project Management
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Context
 
-Currently, two official plugins are available:
+- Our company goal is to develop mineral extraction projects more efficiently than our peers without compromising on quality and safety.
+- Our team of process engineers and project developers uses a combination of industry standard software and in-house custom software designed to integrate with, streamline, and fill in the gaps of standard software.
+- To that end, one of the many things we find ourselves doing is integrating different project management tools, and providing project schedule insights which are otherwise unavailable.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Common User Problems
 
-## React Compiler
+- "What is task X connected to? If task X is delayed, what other tasks will be delayed?"
+- "What's supposed to happen in the next two weeks?"
+  - _related: What's the weather looking like for those two weeks? I'll need to reschedule concrete pouring if it will rain..._
+- "What are all the tasks which lead up to task Y?"
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Goals
 
-## Expanding the ESLint configuration
+We're going to engage in an exercise of rapid prototyping against a simple management service with the following goals:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+1. Develop views (1) to list projects and (2) view the listing of tasks for a chosen project
+2. Refine your initial app to address some user needs.
+   - _Note: Today we're more interested in viewing complex data in a variety of ways than in creating, modifying, or deleting it_
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+We're hoping to see you demonstrate experience with web application design and software engineering by sharing your thought process.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Setup
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+If you haven't done so yet, please initialize a project for a frontend framework of your choice. _(Typescript is preferred but other languages are permitted.)_
+
+## Instructions
+
+- Work with tools of your choice and share your full screen during the interview
+  - _Note: We'll record the session for memory's sake and for improving our process._
+- Before ending the interview, zip up the files and share them with your interviewer via link. Do not send them as an email attachment.
+- This interview is fully open book, with use of AI coding tools fully encouraged as long as you show your process.
+- You may be expected to explain any of the AI code you accept.
+
+## Task Management API
+
+- Available via ngrok at an address provided by your interviewer
+  - API will be available via ngrok at an address such as like `https://{TUNNEL_ID}.ngrok-free.app`
+  - API docs will be available at `https://{TUNNEL_ID}.ngrok-free.app/api-docs/swagger`
+  - JSON formatted API docs will be available at `https://{TUNNEL_ID}.ngrok-free.app/api-docs`
+- The task management service is preloaded with example data
+- No authentication is needed
+
+### Data Model
+
+The task management service uses the following entity structure:
+
+```mermaid
+erDiagram
+    Project ||--o{ Task : "has many"
+    Task ||--o{ Task : "parent-child"
+    Task }o--o{ Task : "depends on"
+
+    Project {
+        number id PK
+        string name
+        number taskCount
+        string earliestStartDate "nullable"
+        string latestEndDate "nullable"
+        number durationDays "nullable"
+    }
+
+    Task {
+        number id PK
+        number projectId FK
+        string name
+        string status "planned | in progress | completed | cancelled"
+        number parentTaskId FK "nullable"
+        number[] dependsOn "array of task IDs"
+        string startDate "nullable"
+        string dueDate "nullable"
+    }
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+**Key Relationships:**
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- A `Project` can have many `Task`s
+- A `Task` belongs to one `Project` (via `projectId`)
+- A `Task` can have a parent `Task` (via `parentTaskId`) for hierarchical organization
+- A `Task` can depend on multiple other `Task`s (via `dependsOn` array) for dependency tracking
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Optional Resources
+
+You don't need to engage with the following links in order to successfully complete this interview, but you may find them useful.
+
+- [Gantt chart](https://en.wikipedia.org/wiki/Gantt_chart)
+  - One of many project management visualizations our users are familiar with.
+- [Critical Path Method](https://en.wikipedia.org/wiki/Critical_path_method)
+  - An approach to scheduling or analyzing complex projects with dependencies.
+- [Open Meteo](https://open-meteo.com/)
+  - A free weather API
